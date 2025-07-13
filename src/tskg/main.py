@@ -1,29 +1,34 @@
+#Imports
 import typer, json
 from pathlib import Path
 
+#Task Storing Variables and the like
 DATA_DIR = Path.home() / "Appdata" / "Local" / "tskgdata"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 DATA_FILE = DATA_DIR / "tasks.json"
-
+# TYPER MY BELOVED
 app = typer.Typer(help="A simple To-Do list for even simpler people", no_args_is_help=True)
-
+# Variables so I don't have to type the same exact fucking thing 10 times
 completed = " | Completed!"
 incomplete = " | Not Completed"
 
+# Retrieves all tasks on json file
 def load_tasks():
     if DATA_FILE.exists():
         with open(DATA_FILE, "r") as f:
             return json.load(f)
     return []
 
+# Saves the updated task list after a removal or an addition.
 def save_tasks(tasks):
     with open(DATA_FILE, "w") as f:
         json.dump(tasks, f, indent=2)
 
+# Removes completed and incomplete from the tasks for easier task recognition
 def remove_extra(task):
     return task.replace(incomplete, "").replace(completed, "").strip()
 
-
+# Adds a task
 @app.command()
 def add(task: str):
     """
@@ -37,7 +42,7 @@ def add(task: str):
         tasks.append(task + incomplete)
         save_tasks(tasks)
 
-
+# Removes a task from the list
 @app.command()
 def remove(task: str):
     """
@@ -52,7 +57,7 @@ def remove(task: str):
             return
     print(f"No task named {task} found")
 
-
+# Completes a task
 @app.command()
 def complete(task: str):
     """
@@ -75,9 +80,8 @@ def complete(task: str):
             return
     print(f'No incomplete task named {task}')
 
-
+# Lists all current tasks
 @app.command()
-
 def list():
     """
     Lists all tasks in list
