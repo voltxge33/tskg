@@ -6,9 +6,11 @@ from pathlib import Path
 DATA_DIR = Path.home() / "Appdata" / "Local" / "tskgdata"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 DATA_FILE = DATA_DIR / "tasks.json"
+
 # TYPER MY BELOVED
 app = typer.Typer(help="A simple To-Do list for even simpler people", no_args_is_help=True)
 # Variables so I don't have to type the same exact fucking thing 10 times
+
 completed = " | Completed!"
 incomplete = " | Not Completed"
 
@@ -24,22 +26,26 @@ def save_tasks(tasks):
     with open(DATA_FILE, "w") as f:
         json.dump(tasks, f, indent=2)
 
-# Removes completed and incomplete from the tasks for easier task recognition
-def remove_extra(task):
-    return task.replace(incomplete, "").replace(completed, "").strip()
 
 # Adds a task
 @app.command()
-def add(task: str):
+def add(task: str = typer.Argument(..., help="The name of the task you want to add"), note: str = typer.Option("", help='If you want to add a specific note to further describe')):
     """
     Adds a task to the To-Do list (Cannot be an existing task)
+
+    Optional: --note Add a little note that shows when you use the list command
     """
     tasks = load_tasks()
-    if task + incomplete in tasks or task + completed in tasks:
+    new_task = {
+        "name": task,
+        "status": incomplete,
+        "note": note
+    }
+    if task in tasks:
         print("Task has already been added, pick another name")
     else:
         print(f"Added {task} to list")
-        tasks.append(task + incomplete)
+        tasks.append(new_task)
         save_tasks(tasks)
 
 # Removes a task from the list
@@ -50,12 +56,13 @@ def remove(task: str):
     """
     tasks = load_tasks()
     for t in tasks:
-        if remove_extra(t) == task:
+        if t["name"] == task:
             tasks.remove(t)
             save_tasks(tasks)
-            print(f"Removed '{task}' from list")
+            print(f'Removed {task} from list')
             return
-    print(f"No task named {task} found")
+    print(f"{task} not found in list, try again.")
+
 
 # Completes a task
 @app.command()
@@ -65,20 +72,22 @@ def complete(task: str):
     """
     tasks = load_tasks()
     for t in tasks:
-        if remove_extra(t) and t.endswith(incomplete):
-            tasks.remove(t)
-            completed_task = remove_extra(task) + completed
-            tasks.append(completed_task)
-            print(f"Marked {task} as completed")
-            removeyn = input("Would you like to remove this task? [Y/n] ")
-            if removeyn == "" or str.upper(removeyn) == "Y":
-                tasks.remove(completed_task)
+        if t["name"] == task:
+            if t["status"] == completed:
+                print(f"{task} is already completed")
+                return
+            t["status"] = completed
+            print(f'Marked {task} as completed')
+            removeyn = input("Would you like to remove this task? [Y/n] ").strip().lower()
+            if removeyn in ["", "y", "yes"]:
+                tasks.remove(t)
                 print("Task removed!")
             else:
-                print("Task not removed")
+                print("Task not removed.")
             save_tasks(tasks)
-            return
-    print(f'No incomplete task named {task}')
+        else:
+            print(f"{task} not found in list.")
+
 
 # Lists all current tasks
 @app.command()
@@ -90,7 +99,10 @@ def list():
     if tasks:
         print("Tasks:")
         for tid, task in enumerate(tasks, start=1):
-            print(f"{tid}. {task}")
+            if task["note"] == "":
+                print(f"{tid}. {task['name']}{task['status']}")
+            else:
+                print(f"{tid}. {task['name']}{task['status']}\nNote: {task["note"]}")
     else:
         print("No tasks found")
 
