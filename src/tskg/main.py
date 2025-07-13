@@ -2,10 +2,13 @@ import typer, json
 from pathlib import Path
 
 DATA_DIR = Path.home() / "Appdata" / "Local" / "tskgdata"
-DATA_DIR.mkdir(parents=True, exist_ok=True)  
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 DATA_FILE = DATA_DIR / "tasks.json"
 
 app = typer.Typer(help="A simple To-Do list for even simpler people", no_args_is_help=True)
+
+completed = " | Completed!"
+incomplete = " | Not Completed"
 
 def load_tasks():
     if DATA_FILE.exists():
@@ -18,7 +21,7 @@ def save_tasks(tasks):
         json.dump(tasks, f, indent=2)
 
 def remove_extra(task):
-    return task.replace(" | Not Complete Yet", "").replace(" | Completed!", "").strip()
+    return task.replace(incomplete, "").replace(completed, "").strip()
 
 
 @app.command()
@@ -27,11 +30,11 @@ def add(task: str):
     Adds a task to the To-Do list (Cannot be an existing task)
     """
     tasks = load_tasks()
-    if task + " | Not Completed" in tasks or task + " | Completed" in tasks:
+    if task + incomplete in tasks or task + completed in tasks:
         print("Task has already been added, pick another name")
     else:
         print(f"Added {task} to list")
-        tasks.append(task + " | Not Completed")
+        tasks.append(task + incomplete)
         save_tasks(tasks)
 
 
@@ -57,14 +60,20 @@ def complete(task: str):
     """
     tasks = load_tasks()
     for t in tasks:
-        if remove_extra(t) and t.endswith(" | Not Completed"):
+        if remove_extra(t) and t.endswith(incomplete):
             tasks.remove(t)
-            completed_task = remove_extra(task) + " | Completed!"
+            completed_task = remove_extra(task) + completed
             tasks.append(completed_task)
-            save_tasks(tasks)
             print(f"Marked {task} as completed")
+            removeyn = input("Would you like to remove this task? [Y/n] ")
+            if removeyn == "" or str.upper(removeyn) == "Y":
+                tasks.remove(completed_task)
+                print("Task removed!")
+            else:
+                print("Task not removed")
+            save_tasks(tasks)
             return
-    print(f'No incomplete task named {task}')    
+    print(f'No incomplete task named {task}')
 
 
 @app.command()
