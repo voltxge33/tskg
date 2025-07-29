@@ -75,7 +75,7 @@ def remove_task(task: str):
 
 
 # Completes a task
-@app.command("copmlete")
+@app.command("complete")
 def complete_task(task: str):
     """
     Changes the status of a task from "Not Complete" to "Completed"
