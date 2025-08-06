@@ -13,6 +13,9 @@ app = typer.Typer(help="A simple To-Do list for even simpler people", no_args_is
 completed = " | Completed!"
 incomplete = " | Not Completed"
 
+#Task Class
+
+
 # Retrieves all tasks on json file
 def load_tasks():
     if DATA_FILE.exists():
