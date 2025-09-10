@@ -42,7 +42,7 @@ def add_task(task: str = typer.Argument(..., help="The name of the task you want
         elif str.lower(priority) in ("m", "medium"):
             priority = "Medium"
         else:
-            print(f"{priority} is not a correct priority level (L,M,H, Low, Medium, High)")
+            print(f"{priority} is not a correct priority level (l,m,h, low, medium, high)")
             return
     tasks = load_tasks()
     new_task = {
