@@ -1,15 +1,16 @@
 #Imports
-import typer, json
+import typer, json, platform
 from pathlib import Path
 
 #Task Storing Variables and the like
-DATA_DIR = Path.home() / "Appdata" / "Local" / "tskgdata"
+OS = platform.system
+DATA_DIR = Path.cwd() / "tskg"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 DATA_FILE = DATA_DIR / "tasks.json"
 
 # TYPER MY BELOVED
 app = typer.Typer(help="A simple To-Do list for even simpler people", no_args_is_help=True)
-# Variables so I don't have to type the same exact fucking thing 10 times
+# completed and incomlete variables for consistency
 completed = " | Completed!"
 incomplete = " | Not Completed"
 
@@ -129,4 +130,4 @@ def list_tasks(sort_by: str = typer.Option(None, help="Sort by priority, status,
         print(f"{task['name']}{task['status']}\nPriority: {task['priority']}")
         if task['note']:
             print(f"Note: {task['note']}")
-    print()
+    print(f"\nPath: {DATA_FILE}")
