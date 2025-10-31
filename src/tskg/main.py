@@ -109,25 +109,24 @@ def list_tasks(sort_by: str = typer.Option(None, help="Sort by priority, status,
     tasks = load_tasks()
     if not tasks:
         print("No tasks found.")
-        return
+    else:
+        if sort_by:
+            sort_by = sort_by.lower()
+            if sort_by in ("priority", "p"):
+                priority_order = {"High": 0, "Medium": 1, "Low": 2}
+                tasks.sort(key=lambda t: priority_order.get(t["priority"], 3))
+            elif sort_by in ("status", "s"):
+                status_order = {incomplete: 0, completed: 1}
+                tasks.sort(key=lambda t: status_order.get(t["status"], 2))
+            elif sort_by in ("name", "n"):
+                tasks.sort(key=lambda t: t["name"].lower())
+            else:
+                print(f"Invalid sort option: {sort_by}. Use 'priority', 'status', or 'name'.")
+                return
 
-    if sort_by:
-        sort_by = sort_by.lower()
-        if sort_by in ("priority", "p"):
-            priority_order = {"High": 0, "Medium": 1, "Low": 2}
-            tasks.sort(key=lambda t: priority_order.get(t["priority"], 3))
-        elif sort_by in ("status", "s"):
-            status_order = {incomplete: 0, completed: 1}
-            tasks.sort(key=lambda t: status_order.get(t["status"], 2))
-        elif sort_by in ("name", "n"):
-            tasks.sort(key=lambda t: t["name"].lower())
-        else:
-            print(f"Invalid sort option: {sort_by}. Use 'priority', 'status', or 'name'.")
-            return
-
-    print("Tasks:")
-    for task in tasks:
-        print(f"{task['name']}{task['status']}\nPriority: {task['priority']}")
-        if task['note']:
-            print(f"Note: {task['note']}")
-    print(f"\nPath: {DATA_FILE}")
+        print("Tasks:")
+        for task in tasks:
+            print(f"{task['name']}{task['status']}\nPriority: {task['priority']}")
+            if task['note']:
+                print(f"Note: {task['note']}")
+    print(f"\nPath: {DATA_DIR}")
